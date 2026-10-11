@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间: 要和mapper持久层层的接口全限定名相同-->
+<mapper namespace="cn.zhangjie.spring001.mapper.LaboratoryMapper">
+    <!--查询-->
+    <select id="selectLaboratory" resultType="laboratory">
+        select * from laboratory
+        <where>
+            <if test="name!=null and name!=''">
+                and name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+    <!--新增-->
+    <insert id="insertLaboratory">
+        INSERT INTO laboratory(name,organization,head,phone,totalValue,area,workStation,create_time,update_time)
+        VALUES(#{name},#{organization},#{head},#{phone},#{totalValue},#{area},#{workStation},#{create_time},#{update_time})
+    </insert>
+    <!--编辑-->
+    <update id="updateLaboratory">
+        UPDATE laboratory SET name=#{name},
+                              organization=#{organization},
+                              head=#{head},
+                              phone=#{phone},
+                              totalValue=#{totalValue},
+                              area=#{area},
+                              workStation=#{workStation},
+                              update_time=#{update_time}
+        WHERE id=#{id}
+    </update>
+    <!--删除-->
+    <delete id="deleteLaboratory">
+        DELETE FROM laboratory WHERE id=#{id}
+    </delete>
+
+</mapper>

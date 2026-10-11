@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间: 要和mapper持久层层的接口全限定名相同-->
+<mapper namespace="cn.zhangjie.spring001.mapper.UserMapper">
+    <select id="selectAll" resultType="user">
+        SELECT u.id, u.name, u.username, u.password, u.email, u.intro, u.phone, u.create_time, u.update_time, r.id as role_id ,r.name as role_name
+        FROM users u
+        JOIN roles r ON u.role_id = r.id
+        <where>
+            <if test="name!=null and name!=''">
+                AND u.name like concat('%',#{name},'%')
+            </if>
+            <if test="phone!=null and phone!=''">
+                AND u.phone like concat('%',#{phone},'%')
+            </if>
+            <if test="role_id!=null and role_id!=''">
+                AND u.role_id like concat(#{role_id})
+            </if>
+        </where>
+    </select>
+
+        <select id="findById" >
+            SELECT * FROM users WHERE id = #{id}
+        </select>
+    <!-- 查询账号 -->
+    <select id="findByUsername" resultType="java.lang.Boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM users
+        WHERE username = #{username}
+    </select>
+    <!-- 查询邮箱 -->
+    <select id="findByEmail" resultType="java.lang.Boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM users
+        WHERE email = #{email}
+    </select>
+    <!-- 查询手机号 -->
+    <select id="findByPhone" resultType="java.lang.Boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM users
+        WHERE phone = #{phone}
+    </select>
+
+
+        <insert id="insertUser">
+            INSERT INTO users(name, username, password, email, phone, role_id, create_time, update_time)
+            VALUES (#{name}, #{username}, #{password}, #{email}, #{phone}, #{role_id}, #{create_time}, #{update_time})
+        </insert>
+
+        <update id="updateUser">
+            UPDATE users
+            SET username=#{username},
+                name=#{name},
+                password=#{password},
+                email=#{email},
+                phone=#{phone},
+                role_id=#{role_id},
+                update_time=#{update_time}
+            WHERE id = #{id}
+        </update>
+
+        <delete id="deleteUser">
+            DELETE FROM users WHERE id=#{id}
+        </delete>
+
+    <select id="getUserByLoginInfo" >
+        SELECT * FROM users WHERE username = #{username} and password = #{password}
+    </select>
+
+    <select id="selectUserByRoleId" resultType="cn.zhangjie.spring001.entity.User">
+        SELECT * FROM users WHERE role_id=#{roleId}
+    </select>
+
+    <delete id="deleteUserByRoleId">
+        DELETE FROM users WHERE role_id=#{id}
+    </delete>
+    <delete id="deleteByIds">
+        delete from users where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

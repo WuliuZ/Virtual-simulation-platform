@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间: 要和mapper持久层层的接口全限定名相同-->
+<mapper namespace="cn.zhangjie.spring001.mapper.TrainingMapper">
+    <!--查询-->
+    <select id="selectTraining" resultType="training">
+        SELECT t.id,t.name,t.major,t.classHours,t.experimentType,t.intro,t.update_time, l.id as laboratory_id ,l.name as laboratory_name
+        FROM training t
+        LEFT JOIN laboratory l ON t.laboratory_id = l.id
+        WHERE (l.id IS NULL OR t.laboratory_id = l.id)
+            <if test="name!=null and name!=''">
+                and t.name like concat('%',#{name},'%')
+            </if>
+    </select>
+    <select id="selectTrainingByLaboId" resultType="java.lang.Boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM training
+        WHERE laboratory_id = #{id}
+    </select>
+
+    <!--新增-->
+    <insert id="insertTraining">
+        INSERT INTO training(name, major, classHours, experimentType, courseSpecific, certificationMapping,
+                             competitionMapping, relatedTrainingResources, intro, laboratory_id, create_time,
+                             update_time)
+        VALUES (#{name}, #{major}, #{classHours}, #{experimentType}, #{courseSpecific}, #{certificationMapping},
+                #{competitionMapping}, #{relatedTrainingResources}, #{intro}, #{laboratory_id}, #{create_time},
+                #{update_time})
+    </insert>
+    <!--编辑-->
+    <update id="updateTraining">
+        UPDATE training SET name=#{name},
+                            major=#{major},
+                            classHours=#{classHours},
+                            experimentType=#{experimentType},
+                            courseSpecific=#{courseSpecific},
+                            certificationMapping=#{certificationMapping},
+                            competitionMapping=#{competitionMapping},
+                            relatedTrainingResources=#{relatedTrainingResources},
+                            intro=#{intro},
+                            laboratory_id=#{laboratory_id},
+                            update_time=#{update_time}
+        WHERE id=#{id}
+    </update>
+
+
+
+    <update id="updateTrainingByLaboId">
+        UPDATE training
+        SET laboratory_id = NULL
+        WHERE laboratory_id = #{id}
+    </update>
+
+
+
+    <!--删除-->
+    <delete id="deleteTraining">
+        DELETE FROM training WHERE id=#{id}
+    </delete>
+
+</mapper>

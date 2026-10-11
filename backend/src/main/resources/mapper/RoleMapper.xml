@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间: 要和mapper持久层层的接口全限定名相同-->
+<mapper namespace="cn.zhangjie.spring001.mapper.RoleMapper">
+    <!--查询-->
+    <select id="selectRole" resultType="role">
+        select * from roles
+        <where>
+            <if test="name!=null and name!=''">
+                and name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+    <!--新增-->
+    <insert id="insertRole">
+        INSERT INTO roles(name,role_describe,create_time,update_time)
+        VALUES(#{name},#{role_describe},#{create_time},#{update_time})
+    </insert>
+    <!--编辑-->
+    <update id="updateRole">
+        UPDATE roles SET name=#{name},
+                        role_describe=#{role_describe},
+                        update_time=#{update_time}
+        WHERE id=#{id}
+    </update>
+    <!--删除-->
+    <delete id="deleteRole">
+        DELETE FROM roles WHERE id=#{id}
+    </delete>
+
+</mapper>

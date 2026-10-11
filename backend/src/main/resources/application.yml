@@ -1,0 +1,19 @@
+#配置项目启动端口号
+server:
+  port: 8080
+#配置数据源
+spring:
+  devtools:
+    add-properties:true
+    additional-paths:sre/main/java
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/mybatist1?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&serverTimezone=GMT%2B8
+#
+#配置Mybatis和xml映射
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: cn.zhangjie.spring001.entity
+

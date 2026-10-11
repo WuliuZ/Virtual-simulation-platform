@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间: 要和mapper持久层层的接口全限定名相同-->
+<mapper namespace="cn.zhangjie.spring001.mapper.SimulationEquipmentMapper">
+    <!--查询-->
+    <select id="selectList" resultType="simulationEquipment">
+        SELECT s.*, l.id as laboratory_id, l.name as laboratory_name
+        FROM simulationequipment s
+        LEFT JOIN laboratory l ON s.laboratory_id = l.id
+        WHERE (l.id IS NULL OR s.laboratory_id = l.id)
+        <if test="number != null and number != ''">
+            AND s.number LIKE CONCAT('%', #{number}, '%')
+        </if>
+        <if test="name != null and name != ''">
+            AND s.name LIKE CONCAT('%', #{name}, '%')
+        </if>
+    </select>
+
+    <!--批量导出查询-->
+    <select id="selectSimulationEquipmentListByids" resultType="SimulationEquipment">
+        SELECT s.*, l.id as laboratory_id, l.name as laboratory_name
+        FROM simulationequipment s
+        LEFT JOIN laboratory l ON s.laboratory_id = l.id
+        WHERE (l.id IS NULL OR s.laboratory_id = l.id) and s.id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </select>
+    <select id="selectSimulationEquipmentListByLaboId" resultType="java.lang.Boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM simulationequipment
+        WHERE laboratory_id = #{id}
+    </select>
+
+    <!--新增-->
+    <insert id="insert">
+        INSERT INTO simulationequipment(name, number, type, soft_system, supplier, status, purpose, laboratory_id,create_time,update_time)
+        VALUES(#{name}, #{number}, #{type}, #{soft_system}, #{supplier}, #{status},#{purpose},#{laboratory_id},#{create_time},#{update_time})
+    </insert>
+    <!--编辑-->
+    <update id="update">
+        UPDATE simulationequipment SET name=#{name},
+                                       number=#{number},
+                                       type=#{type},
+                                       soft_system=#{soft_system},
+                                       supplier=#{supplier},
+                                       status=#{status},
+                                       purpose=#{purpose},
+                                       laboratory_id=#{laboratory_id},
+                                       update_time=#{update_time}
+        WHERE id=#{id}
+    </update>
+    <update id="updateSimulationByLaboId">
+        UPDATE simulationequipment
+        SET laboratory_id = NULL
+        WHERE laboratory_id = #{id}
+    </update>
+    <!--删除-->
+    <delete id="delete">
+        DELETE FROM simulationequipment WHERE id=#{id}
+    </delete>
+    <!--批量删除-->
+    <delete id="deleteByIds">
+        delete from simulationequipment where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间: 要和mapper持久层层的接口全限定名相同-->
+<mapper namespace="cn.zhangjie.spring001.mapper.CourseMapper">
+    <!--查询-->
+    <select id="selectCourse" resultType="course">
+        SELECT c.*, t.id as pte_id ,t.name as pte_name
+        FROM course c
+        LEFT JOIN training t ON c.pte_id = t.id
+        WHERE (t.id IS NULL OR c.pte_id = t.id)
+        <if test="name!=null and name!=''">
+            and c.name like concat('%',#{name},'%')
+        </if>
+    </select>
+    <select id="selectCourseByPteId" resultType="java.lang.Boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN TRUE ELSE FALSE END
+        FROM course
+        WHERE pte_id = #{id}
+    </select>
+
+    <!--新增-->
+    <insert id="insertCourse">
+        INSERT INTO course(name,number,experiment,intro,pte_id, create_time,update_time)
+        VALUES(#{name},#{number},#{experiment},#{intro},#{pte_id},#{create_time},#{update_time})
+    </insert>
+    <!--编辑-->
+    <update id="updateCourse">
+        UPDATE course SET name=#{name},
+                          number=#{number},
+                          experiment=#{experiment},
+                          intro=#{intro},
+                          pte_id=#{pte_id},
+                          update_time=#{update_time}
+        WHERE id=#{id}
+    </update>
+    <!--更新课程-->
+    <update id="updateCourseByTrainId">
+        UPDATE course
+        SET pte_id=null
+        WHERE pte_id=#{id}
+    </update>
+
+    <!--删除-->
+    <delete id="deleteCourse">
+        DELETE FROM course WHERE id=#{id}
+    </delete>
+
+</mapper>
