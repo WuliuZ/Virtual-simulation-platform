@@ -21,7 +21,7 @@
 
 ## 技术栈
 
-**后端**（`backend/`，Java 包名 `cn.zhangjie.spring001`）
+**后端**（`backend/`，Java 包名 `cn.zhangjuntao.spring001`）
 
 | 组件 | 版本 |
 | --- | --- |
@@ -49,7 +49,7 @@
 
 ```
 backend/
-  src/main/java/cn/zhangjie/spring001/
+  src/main/java/cn/zhangjuntao/spring001/
     common/       JwtInterceptor（登录拦截）、JwtTokenUtils、Result（统一响应体）
     config/       CorsConfig（跨域）、WebConfig（拦截器注册）
     controller/   User / Role / Training / Course / Laboratory / SimulationEquipment / ExportExcel

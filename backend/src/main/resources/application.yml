@@ -15,5 +15,5 @@ spring:
 #配置Mybatis和xml映射
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: cn.zhangjie.spring001.entity
+  type-aliases-package: cn.zhangjuntao.spring001.entity
 

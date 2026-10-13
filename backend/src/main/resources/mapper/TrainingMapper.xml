@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!--namespace命名空间: 要和mapper持久层层的接口全限定名相同-->
-<mapper namespace="cn.zhangjie.spring001.mapper.TrainingMapper">
+<mapper namespace="cn.zhangjuntao.spring001.mapper.TrainingMapper">
     <!--查询-->
     <select id="selectTraining" resultType="training">
         SELECT t.id,t.name,t.major,t.classHours,t.experimentType,t.intro,t.update_time, l.id as laboratory_id ,l.name as laboratory_name
