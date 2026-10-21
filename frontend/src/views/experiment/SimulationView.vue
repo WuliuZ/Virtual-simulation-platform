@@ -48,14 +48,29 @@
             <el-button type="danger" size="medium" @click="deleteByIds"
               >- 批量删除</el-button
             >
-            <!-- <el-upload
-              action="http://localhost:8080/api/user/upload"
-              :show-file-list="false"
-              :on-success="successUpload"
-              style="display: inline-block"
+            <!-- 批量导入：用原生 file input + axios 上传，
+                 不走 el-upload 的原因有两个：
+                 1. el-upload 直接发 XHR，绕过 utils/request.js 的拦截器，token 得自己塞；
+                 2. request.js 的拦截器把 Content-Type 强写成 application/json，
+                    会把 multipart/form-data 的 boundary 顶掉，导致后端接不到文件。 -->
+            <input
+              ref="fileInput"
+              type="file"
+              accept=".xlsx"
+              style="display: none"
+              @change="onFileChange"
+            />
+            <el-button
+              class="user-btn"
+              size="medium"
+              icon="el-icon-upload2"
+              type="primary"
+              :loading="importLoading"
+              style="margin-left: 10px"
+              @click="$refs.fileInput.click()"
             >
-              <el-button class="user-btn" type="primary">批量导⼊</el-button>
-            </el-upload> -->
+              批量导入</el-button
+            >
           </el-row>
 
           <!-- 新增设备 -->
@@ -359,6 +374,7 @@
 
 <script>
 import request from "../../utils/request";
+import axios from "axios";
 import moment from "moment";
 
 export default {
@@ -371,6 +387,7 @@ export default {
       }
     };
     return {
+      importLoading: false, //批量导入按钮的 loading 状态
       detailsVisible: false, //详情对话框可见性
       selectedSimulation: {}, //当前选中的设备
       addFormVisible: false, //新增设备表单可见性
@@ -416,6 +433,95 @@ export default {
     };
   },
   methods: {
+    // 选择文件后上传
+    onFileChange(e) {
+      const file = e.target.files && e.target.files[0];
+      // 清空 value，否则连续选同一个文件不会再触发 change
+      e.target.value = "";
+      if (!file) return;
+
+      if (!file.name.toLowerCase().endsWith(".xlsx")) {
+        this.$message.error("只支持 .xlsx 格式，请用 Excel 另存为 .xlsx 后再上传");
+        return;
+      }
+      if (file.size / 1024 / 1024 >= 10) {
+        this.$message.error("文件大小不能超过 10MB");
+        return;
+      }
+
+      // 手动取 token：这里绕开了 utils/request.js 的拦截器，不自己加就一定会被后端拦
+      let token = "";
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        token = user.token || "";
+      } catch (err) {
+        token = "";
+      }
+      if (!token) {
+        this.$message.error("登录已失效，请重新登录后再导入");
+        return;
+      }
+
+      const form = new FormData();
+      form.append("file", file);
+
+      this.importLoading = true;
+      // 注意：用 axios 直接发，且不要手动设 Content-Type，
+      // 让浏览器自己带上 multipart 的 boundary，否则后端收不到文件
+      axios
+        .post("http://localhost:8080/api/simulationEquipment/import", form, {
+          headers: { token: token },
+        })
+        .then((resp) => {
+          this.importLoading = false;
+          const res = resp.data;
+          if (!res || res.code !== "0") {
+            this.$message.error((res && res.msg) || "导入失败");
+            return;
+          }
+          this.showImportResult(res.data || {});
+          this.getData();
+        })
+        .catch((err) => {
+          this.importLoading = false;
+          let msg = "导入失败，请检查后端服务是否正常";
+          if (err.response && err.response.data) {
+            msg = err.response.data.msg || err.response.data.data || msg;
+          } else if (err.message) {
+            msg = err.message;
+          }
+          this.$message.error(msg);
+        });
+    },
+    // 把导入结果渲染成弹窗：成功条数 + 逐条失败明细
+    showImportResult(data) {
+      const successCount = data.successCount || 0;
+      const failCount = data.failCount || 0;
+      const errors = data.errors || [];
+
+      if (failCount === 0) {
+        this.$message.success("导入成功，共 " + successCount + " 条");
+        return;
+      }
+      let html =
+        "<p>成功 <b>" +
+        successCount +
+        "</b> 条，失败 <b style='color:#f56c6c'>" +
+        failCount +
+        "</b> 条</p>";
+      if (errors.length) {
+        html +=
+          "<p style='margin-top:8px'>失败明细：</p><ul style='max-height:240px;overflow:auto;padding-left:18px'>";
+        errors.forEach(function (item) {
+          html += "<li style='line-height:1.6'>" + item + "</li>";
+        });
+        html += "</ul>";
+      }
+      this.$alert(html, "导入结果", {
+        dangerouslyUseHTMLString: true,
+        confirmButtonText: "知道了",
+      });
+    },
     //详情展示
     showDetails(simulation) {
       this.selectedSimulation = simulation;
